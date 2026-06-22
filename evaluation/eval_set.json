@@ -1,0 +1,49 @@
+[
+  {
+    "query": "Do you have brake pads for Bajaj Pulsar 150?",
+    "expected": "returns relevant brake pad SKU"
+  },
+  {
+    "query": "Check stock for BRK-1002",
+    "expected": "returns stock information"
+  },
+  {
+    "query": "I need tyres",
+    "expected": "asks for vehicle information"
+  },
+  {
+    "query": [
+      "Do you have brake pads for Bajaj Pulsar 150?",
+      "What is the stock?"
+    ],
+    "expected": "uses previous context"
+  },
+  {
+    "query": "What's the weather today?",
+    "expected": "politely refuses and stays on domain"
+  },
+  {
+    "query": "Need brake pads",
+    "expected": "asks for vehicle information"
+  },
+  {
+    "query": "Looking for engine oil",
+    "expected": "asks for vehicle information"
+  },
+  {
+    "query": "Tell me a joke",
+    "expected": "politely refuses and stays on domain"
+  },
+  {
+    "query": "Who won the IPL?",
+    "expected": "politely refuses and stays on domain"
+  },
+  {
+    "query": [
+      "Do you have brake pads for Bajaj Pulsar 150?",
+      "What is the stock?",
+      "Check stock again"
+    ],
+    "expected": "uses previous context"
+  }
+]
