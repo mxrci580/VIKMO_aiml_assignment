@@ -11,8 +11,7 @@ The assistant can:
 - Find parts by vehicle.
 - Create structured orders.
 - Maintain conversation context across multiple turns.
-
-The system uses Retrieval-Augmented Generation (RAG) with FAISS vector search and Gemini for conversational interaction.
+- The system uses Retrieval-Augmented Generation (RAG) with FAISS vector search and Gemini for conversational interaction.
 
 ---
 
@@ -59,7 +58,7 @@ GOOGLE_API_KEY=your_api_key
 ## Running the Assistant
 
 ```bash
-python assistant/agent.py
+python -m assistant.agent
 ```
 
 ---
@@ -89,33 +88,23 @@ What's the weather today?
 ## Example Interaction
 
 User:
-```text
-Do you have brake pads for Bajaj Pulsar 150?
-```
+Show Bosch products
 
 Assistant:
-```text
-Yes, BRK-1002 Brake Pad Set for Bajaj Pulsar 150 is available.
-```
+Returns Bosch products retrieved from the catalogue.
 
 User:
-```text
-What is the stock?
-```
+Check stock for BRK-1049
 
 Assistant:
-```text
-Brake Pad Set — Bajaj Pulsar 150 currently has 136 units in stock.
-```
-
----
+We have 130 units of BRK-1049 in stock.
 
 ## Assumptions
 
 - Product information is sourced from the provided catalogue.
 - Stock information is retrieved from catalogue data.
 - The assistant is restricted to auto-parts related queries.
-- Conversation state is maintained for follow-up questions.
+- Conversation history is maintained during the active session to support multi-turn conversations.
 - Evaluation results are based on the included evaluation suite.
 
 ---

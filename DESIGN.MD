@@ -2,15 +2,15 @@
 
 ## 1. System Architecture
 
-User
-↓
-Gemini 2.5 Flash
+User Query
 ↓
 FAISS Retriever
 ↓
-Catalogue Documents
+Top-K Catalogue Documents
 ↓
-Gemini Function Calling
+Gemini 2.5 Flash
+↓
+Function Calling (if required)
 ↓
 Tools
     - check_stock
@@ -47,6 +47,8 @@ HuggingFace embeddings were selected because they are free, easy to run locally,
 - Stored in FAISS vector database
 - Top-k similarity search retrieves relevant products
 
+Retrieved documents are injected into the Gemini prompt as grounding context before response generation. This enables retrieval-augmented generation (RAG) and reduces hallucinations.
+
 Why FAISS?
 - Fast
 - Lightweight
@@ -81,23 +83,13 @@ This approach ensures grounded responses and prevents the model from inventing s
 
 ## 4. Conversation Memory
 
-Two memory layers:
-
 ### Chat History
 
-Stores dialogue.
+Conversation history is maintained throughout the session and appended to the prompt for each user interaction.
 
-### Conversation State
+This allows the assistant to retain context across multiple turns and answer follow-up questions more naturally.
 
-Stores:
-- current SKU
-- current vehicle
-- current product
-
-Allows follow-up queries such as:
-"What is the stock?"
-
-without repeating the SKU.
+Future improvements could include entity-level memory (e.g., current SKU and vehicle tracking) and persistent storage.
 
 ## 5. Prompt Design
 
@@ -246,11 +238,13 @@ Streamlit Chat UI
 ↓
 process_query()
 ↓
-Gemini 2.5 Flash
-↓
 FAISS Retrieval
 ↓
-Tool Calling
+Catalogue Context
+↓
+Gemini 2.5 Flash
+↓
+Tool Calling (optional)
 ↓
 Grounded Response
 

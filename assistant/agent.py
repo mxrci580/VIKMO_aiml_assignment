@@ -1,5 +1,7 @@
 from google import genai
 from google.genai import types
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 import os
 import json
@@ -14,6 +16,20 @@ load_dotenv()
 client = genai.Client(
     api_key=os.getenv("GOOGLE_API_KEY")
 )
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+vectorstore = FAISS.load_local(
+    "faiss_index",
+    embeddings,
+    allow_dangerous_deserialization=True
+)
+
+retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 3}
+)
+
 
 check_stock_tool = types.FunctionDeclaration(
     name="check_stock",
@@ -96,32 +112,16 @@ You help dealers:
 Only answer using catalogue information.
 """
 
-# NOTE:
-# Current implementation uses manual routing and conversation state.
-# Native Gemini tool calling has not yet been implemented.
-# Tools available:
-# - check_stock
-# - create_order
-# - find_parts_by_vehicle
- 
+# Gemini native function calling
+# FAISS retrieval for catalogue grounding
+# Conversation history for context retention
 
 chat_history = []
-
-state = {
-    "current_sku": None,
-    "current_product": None,
-    "current_vehicle": None
-}
-
-
-def show_memory():
-    print("\nMemory State:")
-    print(state)
 
 
 def process_query(query):
 
-    global chat_history, state
+    global chat_history
 
     # Save user message
     chat_history.append(
@@ -131,33 +131,6 @@ def process_query(query):
         }
     )
 
-    # Demo product selection
-    if (
-        "brake" in query.lower()
-        and "pulsar 150" in query.lower()
-    ):
-
-        state["current_sku"] = "BRK-1002"
-        state["current_product"] = (
-            "Brake Pad Set — Bajaj Pulsar 150"
-        )
-        state["current_vehicle"] = (
-            "Bajaj Pulsar 150"
-        )
-
-        response_text = (
-            "Yes, BRK-1002 Brake Pad Set "
-            "for Bajaj Pulsar 150 is available."
-        )
-
-        chat_history.append(
-            {
-                "role": "assistant",
-                "content": response_text
-            }
-        )
-
-        return response_text
 
     conversation = SYSTEM_PROMPT + "\n\n"
 
@@ -166,10 +139,31 @@ def process_query(query):
             f"{msg['role']}: "
             f"{msg['content']}\n"
         )
+    
+    docs = retriever.invoke(query)
+
+    context = "\n\n".join(
+        [doc.page_content for doc in docs]
+    )
+
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=conversation,
+        model="gemini-3.1-flash-lite",
+        contents=f"""
+{SYSTEM_PROMPT}
+
+Catalogue Context:
+{context}
+
+Conversation History:
+{conversation}
+
+Current User Query:
+{query}
+
+Use the catalogue context when answering.
+If an action is needed, call the appropriate tool.
+""",
         config=types.GenerateContentConfig(
             tools=tools
         )
@@ -181,6 +175,8 @@ def process_query(query):
 
         function_name = call.name
         args = dict(call.args)
+        print(f"Tool Called: {function_name}")
+        print(f"Arguments: {args}")
 
         if function_name == "check_stock":
             result = check_stock(**args)
@@ -196,7 +192,20 @@ def process_query(query):
 
         final_response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=f"User Query: {query}\nTool Result: {result}\nGenerate the final answer."
+            contents=f"""
+{SYSTEM_PROMPT}
+
+Catalogue Context:
+{context}
+
+User Query:
+{query}
+
+Tool Result:
+{result}
+
+Generate the final grounded response.
+"""
         )
 
         response_text = final_response.text
