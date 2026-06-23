@@ -142,6 +142,8 @@ Baseline MAE: 7.85
 
 Random Forest MAE: 5.62
 
+[Model Comparison](demo_screenshots/model comparison.png)
+
 Improvement over baseline: 28.35%
 
 The forecasting model was trained using:
@@ -157,6 +159,16 @@ Future forecasts are available in:
 
 forecast_next_4_weeks.csv
 
+### Feature Importance
+
+Feature importance analysis showed that recent demand trends were the strongest predictors of future sales.
+
+- rolling_mean_4 → 68.7%
+- promo_flag → 16.4%
+- lag features → remaining importance
+
+![Feature Importance](demo_screenshots/feature importance.png)
+
 ## Tool Calling
 
 The assistant uses Gemini 2.5 Flash function calling.
@@ -168,3 +180,12 @@ Gemini can invoke:
 - create_order
 
 Tool outputs are executed in Python and returned to Gemini for grounded responses.
+
+
+## Optional Chat UI
+
+Run:
+
+streamlit run app.py
+
+This launches a chat-style interface for interacting with the VIKMO Dealer Assistant.

@@ -3,8 +3,11 @@ from google.genai import types
 from dotenv import load_dotenv
 import os
 import json
-
-from tools import check_stock, create_order, find_parts_by_vehicle
+from assistant.tools import (
+    check_stock,
+    create_order,
+    find_parts_by_vehicle
+)
 
 load_dotenv()
 

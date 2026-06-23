@@ -174,6 +174,7 @@ Future improvements would include hybrid retrieval, more robust evaluation cover
 - WhatsApp interface
 - Multimodal part identification from images
 - Persistent conversation memory using a database
+- A lightweight Streamlit chat interface was added to provide a WhatsApp-style conversational experience on top of the assistant.
 
 ## 10. Demand Forecasting
 
@@ -231,3 +232,45 @@ groupby("sku")["units_sold"].shift(1).rolling(4).mean()
 The shift(1) ensures that the current week's sales are not included in the feature calculation.
 
 The most recent four weeks for each SKU were held out as the test window and were never used during training.
+
+
+## Chat UI
+
+A lightweight chat interface was implemented using Streamlit to provide a WhatsApp-style conversational experience.
+
+### Architecture
+
+User
+↓
+Streamlit Chat UI
+↓
+process_query()
+↓
+Gemini 2.5 Flash
+↓
+FAISS Retrieval
+↓
+Tool Calling
+↓
+Grounded Response
+
+### Features
+
+- Real-time conversational interface
+- Conversation history within a session
+- Example query shortcuts for quick testing
+- Support for retrieval, stock lookup, and order workflows
+- Integration with the existing assistant backend without modifying core business logic
+
+### Design Choice
+
+Streamlit was selected because it allows rapid development of interactive AI applications while keeping the focus on retrieval, tool calling, and forecasting functionality.
+
+The UI layer is intentionally thin and delegates all reasoning, retrieval, memory management, and tool execution to the backend assistant.
+
+### Benefits
+
+- Improves usability compared to a command-line interface
+- Demonstrates how the assistant can be deployed as a customer-facing application
+- Makes evaluation and testing easier for reviewers
+- Provides a foundation for future deployment as a web or WhatsApp-based assistant
